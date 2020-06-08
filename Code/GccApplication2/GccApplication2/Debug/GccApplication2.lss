@@ -1,0 +1,163 @@
+
+GccApplication2.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000000ca  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  0000011e  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .comment      00000030  00000000  00000000  0000011e  2**0
+                  CONTENTS, READONLY
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000150  2**2
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000028  00000000  00000000  0000018c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   00000598  00000000  00000000  000001b4  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 00000522  00000000  00000000  0000074c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   00000232  00000000  00000000  00000c6e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000048  00000000  00000000  00000ea0  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    000002f2  00000000  00000000  00000ee8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    00000089  00000000  00000000  000011da  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000018  00000000  00000000  00001263  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   8:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  10:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  14:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  18:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  1c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  20:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  24:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  28:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  2c:	0c 94 4f 00 	jmp	0x9e	; 0x9e <__vector_11>
+  30:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  34:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  38:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  3c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  40:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  44:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  48:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  4c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  50:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d8 e0       	ldi	r29, 0x08	; 8
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+  60:	0e 94 36 00 	call	0x6c	; 0x6c <main>
+  64:	0c 94 63 00 	jmp	0xc6	; 0xc6 <_exit>
+
+00000068 <__bad_interrupt>:
+  68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000006c <main>:
+
+
+int main(void)
+{
+    /* Using timer0 to generate a square wave on pinPORTB5 while at the same time transferring data from PORTC to PORTD */
+    DDRB |= 0x20; //0b 0010 0000 DDRB.5 as output
+  6c:	bd 9a       	sbi	0x17, 5	; 23
+	TCNT0 = -32; //timer value for 4 microseconds
+  6e:	80 ee       	ldi	r24, 0xE0	; 224
+  70:	82 bf       	out	0x32, r24	; 50
+	TCCR0 = 0x01; //Normal mode, no prescaler
+  72:	81 e0       	ldi	r24, 0x01	; 1
+  74:	83 bf       	out	0x33, r24	; 51
+	
+	TIMSK = (1<<TOIE0); //enable Timer0 overflow interrupt
+  76:	89 bf       	out	0x39, r24	; 57
+	sei();
+  78:	78 94       	sei
+	
+	DDRC = 0x00;  // input
+  7a:	14 ba       	out	0x14, r1	; 20
+	DDRD = 0xFF; //output
+  7c:	8f ef       	ldi	r24, 0xFF	; 255
+  7e:	81 bb       	out	0x11, r24	; 17
+	int counter = 7;
+  80:	87 e0       	ldi	r24, 0x07	; 7
+  82:	90 e0       	ldi	r25, 0x00	; 0
+	
+	
+	while (1){ //wait here
+		if (counter>10){
+			PORTC = 0x12;
+  84:	32 e1       	ldi	r19, 0x12	; 18
+	DDRD = 0xFF; //output
+	int counter = 7;
+	
+	
+	while (1){ //wait here
+		if (counter>10){
+  86:	8b 30       	cpi	r24, 0x0B	; 11
+  88:	91 05       	cpc	r25, r1
+  8a:	24 f0       	brlt	.+8      	; 0x94 <main+0x28>
+			PORTC = 0x12;
+  8c:	35 bb       	out	0x15, r19	; 21
+			counter=0;
+  8e:	80 e0       	ldi	r24, 0x00	; 0
+  90:	90 e0       	ldi	r25, 0x00	; 0
+  92:	02 c0       	rjmp	.+4      	; 0x98 <main+0x2c>
+				
+		}else{
+			PORTC = counter;
+  94:	85 bb       	out	0x15, r24	; 21
+			counter++;
+  96:	01 96       	adiw	r24, 0x01	; 1
+		}
+		
+		PORTD = PINC;
+  98:	23 b3       	in	r18, 0x13	; 19
+  9a:	22 bb       	out	0x12, r18	; 18
+	}
+  9c:	f4 cf       	rjmp	.-24     	; 0x86 <main+0x1a>
+
+0000009e <__vector_11>:
+}
+ISR(TIMER0_OVF_vect){
+  9e:	1f 92       	push	r1
+  a0:	0f 92       	push	r0
+  a2:	0f b6       	in	r0, 0x3f	; 63
+  a4:	0f 92       	push	r0
+  a6:	11 24       	eor	r1, r1
+  a8:	8f 93       	push	r24
+  aa:	9f 93       	push	r25
+	TCNT0 = -32;
+  ac:	80 ee       	ldi	r24, 0xE0	; 224
+  ae:	82 bf       	out	0x32, r24	; 50
+	PORTB ^= 0x20; //toggle PORTB5
+  b0:	98 b3       	in	r25, 0x18	; 24
+  b2:	80 e2       	ldi	r24, 0x20	; 32
+  b4:	89 27       	eor	r24, r25
+  b6:	88 bb       	out	0x18, r24	; 24
+}
+  b8:	9f 91       	pop	r25
+  ba:	8f 91       	pop	r24
+  bc:	0f 90       	pop	r0
+  be:	0f be       	out	0x3f, r0	; 63
+  c0:	0f 90       	pop	r0
+  c2:	1f 90       	pop	r1
+  c4:	18 95       	reti
+
+000000c6 <_exit>:
+  c6:	f8 94       	cli
+
+000000c8 <__stop_program>:
+  c8:	ff cf       	rjmp	.-2      	; 0xc8 <__stop_program>
